@@ -13,47 +13,53 @@ class ArticleRoutes < Sinatra::Base
   end
 
   get('/') do
-    summmary = @articleCtrl.get_batch
+    summary = @articleCtrl.get_batch
 
-    if !(summary[:ok])
-      { articles: summary[:data] }.to_json
+    if summary[:ok]
+      { articles: summary[:data] }
     else
-      { msg: 'Could not get articles.' }.to_json
-    end
+      { msg: 'Could not get articles.' }
+    end.to_json
   end
 
   get('/:id') do
-    
+    summary = @articleCtrl.get_article(params['id'])
+    if summary[:ok]
+      { article: summary[:data] }
+    else
+      { msg: "Could not find article with id: #{params['id']}." }
+    end.to_json
   end
 
   post('/') do
     payload = JSON.parse(request.body.read)
-    summary = @articleCtrl.update_article(payload)
+    summary = @articleCtrl.create_article(payload)
 
     if summary[:ok]
-      { msg: 'Article updated' }.to_json
+      { msg: 'Article created' }
     else
-      { msg: summary[:msg] }.to_json
-    end
+      { msg: summary[:msg] }
+    end.to_json
   end
 
   put('/:id') do
     payload = JSON.parse(request.body.read)
-    summary = @articleCtrl.uptade_article params['ids'], payload
+    summary = @articleCtrl.update_article params['id'], payload
 
     if summary[:ok]
+      { msg: 'Article updated' }
     else
-      { msg: summary[:msg] }.to_json
-    end
+      { msg: summary[:msg] }
+    end.to_json
   end
 
   delete('/:id') do
-    summary = self.delete_article params['id']
+    summary = @articleCtrl.delete_article params['id']
 
     if summary[:ok]
-      { msg: 'Article deleted' }.to_json
+      { msg: 'Article deleted' }
     else
-      { mgs: 'Article does not exist' }.to_bson
-    end
+      { msg: 'Article does not exist' }
+    end.to_json
   end
 end
