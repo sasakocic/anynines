@@ -1,11 +1,13 @@
 require_relative '../controllers/articles'
+require_relative '../controllers/comments'
 
 class ArticleRoutes < Sinatra::Base
   use AuthMiddleware
 
   def initialize
     super
-    @articleCtrl = ArticleController.new
+    @article_controller = ArticleController.new
+    @comment_controller = CommentController.new
   end
 
   before do
@@ -13,7 +15,7 @@ class ArticleRoutes < Sinatra::Base
   end
 
   get('/') do
-    summary = @articleCtrl.get_batch
+    summary = @article_controller.get_batch
 
     if summary[:ok]
       { articles: summary[:data] }
@@ -22,8 +24,17 @@ class ArticleRoutes < Sinatra::Base
     end.to_json
   end
 
+  get('/:id/comments') do
+    summary = @comment_controller.get_article_comments(params['id'])
+    if summary[:ok]
+      { comments: summary[:data] }
+    else
+      { msg: "Could not find comments for article with id: #{params['id']}." }
+    end.to_json
+  end
+
   get('/:id') do
-    summary = @articleCtrl.get_article(params['id'])
+    summary = @article_controller.get_article(params['id'])
     if summary[:ok]
       { article: summary[:data] }
     else
@@ -31,9 +42,20 @@ class ArticleRoutes < Sinatra::Base
     end.to_json
   end
 
+  post('/:id/comments') do
+    payload = JSON.parse(request.body.read)
+    summary = @comment_controller.create_article_comment(params['id'], payload)
+
+    if summary[:ok]
+      { msg: 'Comment created' }
+    else
+      { msg: summary[:msg] }
+    end.to_json
+  end
+
   post('/') do
     payload = JSON.parse(request.body.read)
-    summary = @articleCtrl.create_article(payload)
+    summary = @article_controller.create_article(payload)
 
     if summary[:ok]
       { msg: 'Article created' }
@@ -44,7 +66,7 @@ class ArticleRoutes < Sinatra::Base
 
   put('/:id') do
     payload = JSON.parse(request.body.read)
-    summary = @articleCtrl.update_article params['id'], payload
+    summary = @article_controller.update_article params['id'], payload
 
     if summary[:ok]
       { msg: 'Article updated' }
@@ -53,8 +75,9 @@ class ArticleRoutes < Sinatra::Base
     end.to_json
   end
 
+
   delete('/:id') do
-    summary = @articleCtrl.delete_article params['id']
+    summary = @article_controller.delete_article params['id']
 
     if summary[:ok]
       { msg: 'Article deleted' }

@@ -26,6 +26,7 @@ require_relative 'comment'
 
 article = Article.create(:title => 'Title ABC', :content => 'Lorem Ipsum', :created_at => Time.now)
 article.comments.create(:content => '1st comment', :author_name => 'Author', :created_at => Time.now)
+article.comments.create(:content => '2nd comment', :author_name => 'Another Author', :created_at => Time.now)
 Article.create(:title => 'Title ZFX', :content => 'Some Blog Post', :created_at => Time.now)
 Article.create(:title => 'Title YNN', :content => 'O_O_Y_O_O', :created_at => Time.now)
 
