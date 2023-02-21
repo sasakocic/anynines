@@ -17,6 +17,7 @@ describe ArticleController do
     expect(result[:ok]).to be true
     expect(result[:data]).to be_truthy
     expect(result[:data][:title]).to eq('Title ABC')
+    expect(result[:data].comments.first[:content]).to eq('1st comment')
   end
 
   it 'gets all articles from db' do
